@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Web App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Test Telegram WebApps API</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- Подключаем скрипт от Telegram -->
+
     <style>
         body {
             color: var(--tg-theme-text-color);
@@ -14,6 +15,15 @@
             flex-direction: column;
             align-items: center;
             font-size: 18px;
+            margin: 0; /* Убираем отступы */
+        }
+
+        .hint {
+            color: var(--tg-theme-hint-color);
+        }
+
+        .link {
+            color: var(--tg-theme-link-color);
         }
 
         .button {
@@ -21,91 +31,103 @@
             color: var(--tg-theme-button-text-color);
             border: none;
             font-size: 18px;
-            padding: 10px 20px;
-            cursor: pointer;
-            margin: 10px;
+            padding: 10px 20px; /* Добавляем отступы для кнопок */
+            cursor: pointer; /* Указатель курсора */
+            margin: 5px; /* Отступ между кнопками */
+            opacity: 0; /* Начальная непрозрачность для анимации */
+            transform: translateY(20px); /* Начальное положение для анимации */
+            transition: opacity 0.3s ease, transform 0.3s ease; /* Параметры анимации */
+        }
+
+        .button.show {
+            opacity: 1; /* Конечная непрозрачность */
+            transform: translateY(0); /* Конечное положение */
         }
 
         #usercard {
             text-align: center;
-            display: none;
+            display: none; /* Изначально скрываем карточку пользователя */
         }
 
-        #userAvatar {
-            width: 80px; /* Ширина аватара */
-            height: 80px; /* Высота аватара */
-            border-radius: 50%; /* Классическая круглая форма */
-            margin-bottom: 10px; /* Отступ снизу */
+        #navigation {
+            display: flex;
+            flex-direction: column; /* Вертикальная компоновка */
+            align-items: center; /* Центрируем кнопки */
+            margin: 20px 0; /* Отступы сверху и снизу */
         }
 
-        #balanceSection {
-            text-align: center;
-            display: none;
-        }
     </style>
 </head>
+
 <body>
+    <div id="navigation">
+        <button id="profileBtn" class="button">Профиль</button>
+        <button id="bonusesBtn" class="button">Бонусы</button>
+        <button id="vipBtn" class="button">VIP</button>
+    </div>
+
     <div id="usercard">
-        <img id="userAvatar" src="" alt="Аватар пользователя">
+        <!-- Карта профиля, человека, который к нам обратился -->
     </div>
-    <div id="balanceSection">
-        <p>Баланс: <span id="balanceValue">0</span> монет</p>
-        <button id="clickButton" class="button">Клик</button>
-    </div>
-    <button id="profileBtn" class="button">Профиль</button>
-
+    
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        let tg = window.Telegram.WebApp; // Получаем объект webapp Telegram
+        tg.expand(); // Расширяем на все окно
 
-        // Загружаем начальный баланс из localStorage
-        let balance = localStorage.getItem('userBalance') ? parseInt(localStorage.getItem('userBalance')) : 0;
-        document.getElementById("balanceValue").innerText = balance;
-
-        // Функция для загрузки информации о пользователе
-        function displayUserInfo() {
-            let usercard = document.getElementById("usercard");
-            usercard.innerHTML = ''; // Очищаем поле перед заполнением
-
-            let avatar = document.getElementById("userAvatar");
-            // Загружаем аватар из Telegram профиля
-            avatar.src = tg.initDataUnsafe.user.photo_url || 'https://via.placeholder.com/80'; // Заглушка для отсутствующего аватара
-
-            let profName = document.createElement('p');
-            profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
-            usercard.appendChild(avatar); // Добавляем аватар
-            usercard.appendChild(profName);
-
-            let userid = document.createElement('p');
-            userid.innerText = `User ID: ${tg.initDataUnsafe.user.id || 'N/A'}`;
-            usercard.appendChild(userid);
+        // Функция для появления кнопок с анимацией
+        function showButtons() {
+            const buttons = document.querySelectorAll('#navigation .button');
+            buttons.forEach((button, index) => {
+                setTimeout(() => {
+                    button.classList.add('show'); // Добавляем класс для отображения
+                }, index * 100); // Мгновенная задержка для каждой кнопки
+            });
         }
 
-        // Обработчик кнопки "Профиль"
+        // Показать кнопки при загрузке
+        showButtons();
+
+        // Обработчик события нажатия кнопки "Профиль"
         document.getElementById("profileBtn").addEventListener('click', function() {
             let usercard = document.getElementById("usercard");
-            let balanceSection = document.getElementById("balanceSection");
-
-            if (usercard.style.display === "none" || usercard.style.display === "") {
-                usercard.style.display = "block";
-                balanceSection.style.display = "block";
-                displayUserInfo();
+            // Переключаем видимость карточки пользователя
+            if (usercard.style.display === "none") {
+                usercard.style.display = "block"; // Показываем карточку
+                displayUserInfo(); // Выводим информацию о пользователе
             } else {
-                usercard.style.display = "none";
-                balanceSection.style.display = "none";
+                usercard.style.display = "none"; // Скрываем карточку
             }
         });
 
-        // Обработчик кнопки "Клик"
-        document.getElementById("clickButton").addEventListener('click', function() {
-            balance++;
-            document.getElementById("balanceValue").innerText = balance;
-            localStorage.setItem('userBalance', balance);
+        // Функция для отображения информации о пользователе
+        function displayUserInfo() {
+            let usercard = document.getElementById("usercard");
+            
+            // Очищаем карточку перед добавлением новой информации
+            usercard.innerHTML = '';
+
+            let profName = document.createElement('p'); // Создаем параграф
+            profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
+            // Выводим имя, "фамилию", username
+            usercard.appendChild(profName); // Добавляем имя
+
+            let userid = document.createElement('p'); // Создаем еще один параграф
+            userid.innerText = `User ID: ${tg.initDataUnsafe.user.id || 'N/A'}`; // Показываем user_id
+            usercard.appendChild(userid); // Добавляем user_id
+            
+            // Если необходимо, можно добавить изображение, как в вашем комментарии выше
+            /* 
+            let pic = document.createElement('img'); // Создаем img
+            pic.src = tg.initDataUnsafe.user.photo_url; // Задаем src 
+            usercard.appendChild(pic); // Добавляем элемент в карточку 
+            */
+        }
+
+        // Обрабатываем событие нажатия на основную кнопку
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            tg.sendData("some string that we need to send");
+            // При клике на основную кнопку отправляем данные в строковом виде
         });
-
-        // Инициализация отображения начального баланса
-        document.getElementById("balanceValue").innerText = balance;
-
     </script>
 </body>
 </html>
