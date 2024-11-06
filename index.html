@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Telegram WebApps API</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script> <!-- Подключаем скрипт от Telegram -->
-
+    <title>Telegram Web App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             color: var(--tg-theme-text-color);
@@ -17,86 +16,96 @@
             font-size: 18px;
         }
 
-        .hint {
-            color: var(--tg-theme-hint-color);
-        }
-
-        .link {
-            color: var(--tg-theme-link-color);
-        }
-
         .button {
             background: var(--tg-theme-button-color);
             color: var(--tg-theme-button-text-color);
             border: none;
             font-size: 18px;
-            padding: 10px 20px; /* Добавляем отступы для кнопок */
-            cursor: pointer; /* Указатель курсора */
-        }
-
-        .button:not(:last-child) {
-            margin-bottom: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 10px;
         }
 
         #usercard {
             text-align: center;
-            display: none; /* Изначально скрываем карточку пользователя */
+            display: none;
+        }
+
+        #userAvatar {
+            width: 80px; /* Ширина аватара */
+            height: 80px; /* Высота аватара */
+            border-radius: 50%; /* Классическая круглая форма */
+            margin-bottom: 10px; /* Отступ снизу */
+        }
+
+        #balanceSection {
+            text-align: center;
+            display: none;
         }
     </style>
 </head>
-
 <body>
     <div id="usercard">
-        <!-- Карта профиля, человека, который к нам обратился -->
+        <img id="userAvatar" src="" alt="Аватар пользователя">
     </div>
-    
-    <button id="profileBtn" class="button">Профиль</button> <!-- Кнопка для показа/скрытия профиля -->
-    
-    <script>
-        let tg = window.Telegram.WebApp; // Получаем объект webapp Telegram
-        tg.expand(); // Расширяем на все окно
+    <div id="balanceSection">
+        <p>Баланс: <span id="balanceValue">0</span> монет</p>
+        <button id="clickButton" class="button">Клик</button>
+    </div>
+    <button id="profileBtn" class="button">Профиль</button>
 
-        // Обработчик события нажатия кнопки "Профиль"
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Загружаем начальный баланс из localStorage
+        let balance = localStorage.getItem('userBalance') ? parseInt(localStorage.getItem('userBalance')) : 0;
+        document.getElementById("balanceValue").innerText = balance;
+
+        // Функция для загрузки информации о пользователе
+        function displayUserInfo() {
+            let usercard = document.getElementById("usercard");
+            usercard.innerHTML = ''; // Очищаем поле перед заполнением
+
+            let avatar = document.getElementById("userAvatar");
+            // Загружаем аватар из Telegram профиля
+            avatar.src = tg.initDataUnsafe.user.photo_url || 'https://via.placeholder.com/80'; // Заглушка для отсутствующего аватара
+
+            let profName = document.createElement('p');
+            profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
+            usercard.appendChild(avatar); // Добавляем аватар
+            usercard.appendChild(profName);
+
+            let userid = document.createElement('p');
+            userid.innerText = `User ID: ${tg.initDataUnsafe.user.id || 'N/A'}`;
+            usercard.appendChild(userid);
+        }
+
+        // Обработчик кнопки "Профиль"
         document.getElementById("profileBtn").addEventListener('click', function() {
             let usercard = document.getElementById("usercard");
-            // Переключаем видимость карточки пользователя
-            if (usercard.style.display === "none") {
-                usercard.style.display = "block"; // Показываем карточку
-                displayUserInfo(); // Выводим информацию о пользователе
+            let balanceSection = document.getElementById("balanceSection");
+
+            if (usercard.style.display === "none" || usercard.style.display === "") {
+                usercard.style.display = "block";
+                balanceSection.style.display = "block";
+                displayUserInfo();
             } else {
-                usercard.style.display = "none"; // Скрываем карточку
+                usercard.style.display = "none";
+                balanceSection.style.display = "none";
             }
         });
 
-        // Функция для отображения информации о пользователе
-        function displayUserInfo() {
-            let usercard = document.getElementById("usercard");
-            
-            // Очищаем карточку перед добавлением новой информации
-            usercard.innerHTML = '';
-
-            let profName = document.createElement('p'); // Создаем параграф
-            profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
-            // Выводим имя, "фамилию", username
-            usercard.appendChild(profName); // Добавляем имя
-
-            let userid = document.createElement('p'); // Создаем еще один параграф
-            userid.innerText = `User ID: ${tg.initDataUnsafe.user.id || 'N/A'}`; // Показываем user_id
-            usercard.appendChild(userid); // Добавляем user_id
-            
-            // Если необходимо, можно добавить изображение, как в вашем комментарии выше
-            /* 
-            let pic = document.createElement('img'); // Создаем img
-            pic.src = tg.initDataUnsafe.user.photo_url; // Задаем src 
-            usercard.appendChild(pic); // Добавляем элемент в карточку 
-            */
-        }
-
-        // Обрабатываем событие нажатия на основную кнопку
-        Telegram.WebApp.onEvent('mainButtonClicked', function() {
-            tg.sendData("some string that we need to send");
-            // При клике на основную кнопку отправляем данные в строковом виде
+        // Обработчик кнопки "Клик"
+        document.getElementById("clickButton").addEventListener('click', function() {
+            balance++;
+            document.getElementById("balanceValue").innerText = balance;
+            localStorage.setItem('userBalance', balance);
         });
+
+        // Инициализация отображения начального баланса
+        document.getElementById("balanceValue").innerText = balance;
+
     </script>
 </body>
 </html>
