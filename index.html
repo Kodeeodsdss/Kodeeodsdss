@@ -26,14 +26,28 @@
             margin: 10px;
         }
 
-        #usercard, #balanceSection {
+        #usercard {
+            text-align: center;
+            display: none;
+        }
+
+        #userAvatar {
+            width: 80px; /* Ширина аватара */
+            height: 80px; /* Высота аватара */
+            border-radius: 50%; /* Классическая круглая форма */
+            margin-bottom: 10px; /* Отступ снизу */
+        }
+
+        #balanceSection {
             text-align: center;
             display: none;
         }
     </style>
 </head>
 <body>
-    <div id="usercard"></div>
+    <div id="usercard">
+        <img id="userAvatar" src="" alt="Аватар пользователя">
+    </div>
     <div id="balanceSection">
         <p>Баланс: <span id="balanceValue">0</span> монет</p>
         <button id="clickButton" class="button">Клик</button>
@@ -44,17 +58,21 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Используем localStorage для сохранения и загрузки баланса
+        // Загружаем начальный баланс из localStorage
         let balance = localStorage.getItem('userBalance') ? parseInt(localStorage.getItem('userBalance')) : 0;
         document.getElementById("balanceValue").innerText = balance;
 
         // Функция для загрузки информации о пользователе
         function displayUserInfo() {
             let usercard = document.getElementById("usercard");
-            usercard.innerHTML = '';
-            
+            usercard.innerHTML = ''; // Очищаем поле перед заполнением
+
+            let avatar = document.getElementById("userAvatar");
+            avatar.src = tg.initDataUnsafe.user.photo_url || 'https://via.placeholder.com/80'; // Загружаем аватар или ставим заглушку
+
             let profName = document.createElement('p');
             profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
+            usercard.appendChild(avatar); // Добавляем аватар
             usercard.appendChild(profName);
 
             let userid = document.createElement('p');
