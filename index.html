@@ -57,55 +57,60 @@
     
     <button id="profileBtn" class="button">Профиль</button> <!-- Кнопка для показа/скрытия профиля -->
     
-    <script>
-        let tg = window.Telegram.WebApp; // Получаем объект webapp Telegram
-        tg.expand(); // Расширяем на все окно
+   <script>
+    let tg = window.Telegram.WebApp; // Получаем объект webapp Telegram
+    tg.expand(); // Расширяем на все окно
 
-        // Переменная для хранения баланса
-        let balance = 0;
+    // Загружаем баланс из localStorage или инициализируем его, если данных нет
+    let balance = localStorage.getItem('userBalance') ? parseInt(localStorage.getItem('userBalance')) : 0;
 
-        // Обработчик события нажатия кнопки "Профиль"
-        document.getElementById("profileBtn").addEventListener('click', function() {
-            let usercard = document.getElementById("usercard");
-            let balanceSection = document.getElementById("balance");
-            // Переключаем видимость карточки пользователя
-            if (usercard.style.display === "none") {
-                usercard.style.display = "block"; // Показываем карточку
-                displayUserInfo(); // Выводим информацию о пользователе
-                balanceSection.style.display = "block"; // Показываем раздел с балансом
-            } else {
-                usercard.style.display = "none"; // Скрываем карточку
-                balanceSection.style.display = "none"; // Скрываем раздел с балансом
-            }
-        });
+    // Отображаем начальное значение баланса
+    document.getElementById("balanceValue").innerText = balance;
 
-        // Функция для отображения информации о пользователе
-        function displayUserInfo() {
-            let usercard = document.getElementById("usercard");
-            // Очищаем карточку перед добавлением новой информации
-            usercard.innerHTML = '';
-
-            let profName = document.createElement('p'); // Создаем параграф
-            profName.innerText = \`${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})\`;
-            // Выводим имя, "фамилию", username
-            usercard.appendChild(profName); // Добавляем имя
-
-            let userid = document.createElement('p'); // Создаем еще один параграф
-            userid.innerText = \`User ID: ${tg.initDataUnsafe.user.id || 'N/A'}\`; // Показываем user_id
-            usercard.appendChild(userid); // Добавляем user_id
+    // Обработчик события нажатия кнопки "Профиль"
+    document.getElementById("profileBtn").addEventListener('click', function() {
+        let usercard = document.getElementById("usercard");
+        let balanceSection = document.getElementById("balance");
+        // Переключаем видимость карточки пользователя
+        if (usercard.style.display === "none") {
+            usercard.style.display = "block"; // Показываем карточку
+            displayUserInfo(); // Выводим информацию о пользователе
+            balanceSection.style.display = "block"; // Показываем раздел с балансом
+        } else {
+            usercard.style.display = "none"; // Скрываем карточку
+            balanceSection.style.display = "none"; // Скрываем раздел с балансом
         }
+    });
 
-        // Обработчик события нажатия кнопки "Клик"
-        document.getElementById("clickButton").addEventListener('click', function() {
-            balance++; // Увеличиваем баланс на 1
-            document.getElementById("balanceValue").innerText = balance; // Обновляем отображаемый баланс
-        });
+    // Функция для отображения информации о пользователе
+    function displayUserInfo() {
+        let usercard = document.getElementById("usercard");
+        // Очищаем карточку перед добавлением новой информации
+        usercard.innerHTML = '';
 
-        // Обрабатываем событие нажатия на основную кнопку
-        Telegram.WebApp.onEvent('mainButtonClicked', function() {
-            tg.sendData("some string that we need to send");
-            // При клике на основную кнопку отправляем данные в строковом виде
-        });
-    </script>
+        let profName = document.createElement('p'); // Создаем параграф
+        profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
+        // Выводим имя, "фамилию", username
+        usercard.appendChild(profName); // Добавляем имя
+
+        let userid = document.createElement('p'); // Создаем еще один параграф
+        userid.innerText = `User ID: ${tg.initDataUnsafe.user.id || 'N/A'}`; // Показываем user_id
+        usercard.appendChild(userid); // Добавляем user_id
+    }
+
+    // Обработчик события нажатия кнопки "Клик"
+    document.getElementById("clickButton").addEventListener('click', function() {
+        balance++; // Увеличиваем баланс на 1
+        document.getElementById("balanceValue").innerText = balance; // Обновляем отображаемый баланс
+        localStorage.setItem('userBalance', balance); // Сохраняем новый баланс в localStorage
+    });
+
+    // Обрабатываем событие нажатия на основную кнопку
+    Telegram.WebApp.onEvent('mainButtonClicked', function() {
+        tg.sendData("some string that we need to send");
+        // При клике на основную кнопку отправляем данные в строковом виде
+    });
+</script>
+
 </body>
 </html>
