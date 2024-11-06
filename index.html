@@ -68,7 +68,8 @@
             usercard.innerHTML = ''; // Очищаем поле перед заполнением
 
             let avatar = document.getElementById("userAvatar");
-            avatar.src = tg.initDataUnsafe.user.photo_url || 'https://via.placeholder.com/80'; // Загружаем аватар или ставим заглушку
+            // Загружаем аватар из Telegram профиля
+            avatar.src = tg.initDataUnsafe.user.photo_url || 'https://via.placeholder.com/80'; // Заглушка для отсутствующего аватара
 
             let profName = document.createElement('p');
             profName.innerText = `${tg.initDataUnsafe.user.first_name || ''} ${tg.initDataUnsafe.user.last_name || ''} (${tg.initDataUnsafe.user.username || 'N/A'})`;
