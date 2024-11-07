@@ -14,7 +14,6 @@
             font-family: Arial, sans-serif;
         }
         #usercard {
-            display: none;
             margin-top: 20px;
             border: 1px solid #ccc;
             padding: 15px;
@@ -23,7 +22,6 @@
     </style>
 </head>
 <body>
-    <button id="profileBtn">Профиль</button>
     <div id="usercard"></div>
 
     <script>
@@ -37,18 +35,26 @@
             const lastName = tg.initDataUnsafe.user.last_name || '';
             const username = tg.initDataUnsafe.user.username || '';
 
-            fetch('https://github.com/Kodeeodsdss/Kodeeodsdss:5000/user', {  // Измените на свой URL после развертывания
+            fetch('http://localhost:5000/user', {  // Измените на свой URL после развертывания
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ userId, firstName, lastName, username })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+                return response.json();
+            })
             .then(data => {
                 displayUserInfo(data);
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                document.getElementById("usercard").innerHTML = `<p>Ошибка загрузки данных</p>`; // Сообщение об ошибке
+            });
         }
 
         // Функция отображения информации пользователя
@@ -63,7 +69,8 @@
             usercard.style.display = "block";
         }
 
-        document.getElementById("profileBtn").addEventListener('click', fetchUserData);
+        // Вызываем fetchUserData сразу после загрузки страницы
+        fetchUserData();
     </script>
 </body>
 </html>
