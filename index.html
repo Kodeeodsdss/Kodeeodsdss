@@ -12,17 +12,67 @@
             flex-direction: column;
             align-items: center;
             font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
         }
         #usercard {
             margin-top: 20px;
             border: 1px solid #ccc;
             padding: 15px;
             border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        #usercard img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .nav-menu {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #f8f8f8;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+        }
+        .nav-menu a {
+            text-decoration: none;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-menu i {
+            font-size: 24px;
+        }
+        @media (max-width: 600px) {
+            #usercard {
+                width: 95%;
+            }
         }
     </style>
 </head>
 <body>
     <div id="usercard"></div>
+
+    <div class="nav-menu">
+        <a href="#" id="profileLink">
+            <i class="fas fa-user"></i>
+            Профиль
+        </a>
+        <a href="#" id="bonusLink">
+            <i class="fas fa-gift"></i>
+            Бонусы
+        </a>
+    </div>
 
     <script>
         let tg = window.Telegram.WebApp;
@@ -34,8 +84,9 @@
             const firstName = tg.initDataUnsafe.user.first_name || '';
             const lastName = tg.initDataUnsafe.user.last_name || '';
             const username = tg.initDataUnsafe.user.username || '';
+            const avatarUrl = tg.initDataUnsafe.user.photo_url || ''; // Получаем URL аватара
 
-            fetch('http://localhost:5000/user', {  // Измените на свой URL после развертывания
+            fetch('http://localhost:5000/user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -49,18 +100,19 @@
                 return response.json();
             })
             .then(data => {
-                displayUserInfo(data);
+                displayUserInfo(data, avatarUrl);
             })
             .catch(err => {
                 console.error(err);
-                document.getElementById("usercard").innerHTML = `<p>Ошибка загрузки данных</p>`; // Сообщение об ошибке
+                document.getElementById("usercard").innerHTML = `<p>Ошибка загрузки данных</p>`;
             });
         }
 
         // Функция отображения информации пользователя
-        function displayUserInfo(user) {
+        function displayUserInfo(user, avatarUrl) {
             const usercard = document.getElementById("usercard");
             usercard.innerHTML = `
+                <img src="${avatarUrl}" alt="Аватар пользователя">
                 <p>Имя: ${user.firstName}</p>
                 <p>Фамилия: ${user.lastName}</p>
                 <p>UserID: ${user.userId}</p>
@@ -72,5 +124,8 @@
         // Вызываем fetchUserData сразу после загрузки страницы
         fetchUserData();
     </script>
+
+    <!-- Подключаем Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </body>
 </html>
